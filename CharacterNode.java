@@ -1,3 +1,4 @@
+
 public class CharacterNode{
     // 26 characters + '
     CharacterNode chars[] = new CharacterNode[27];

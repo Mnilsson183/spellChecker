@@ -1,11 +1,17 @@
+
 import java.nio.file.Path;
 import java.util.Scanner;
 import java.util.Vector;
 
 public class SpellCheck {
+
+    static Dictionary dictionary = null;
+
+    static public void initDictionary(Path pathToDictionary){
+        dictionary = new Dictionary(pathToDictionary);
+    }
     
-    static public Vector<String> check(Path pathToFileToCheck, Path pathToDictionary){
-        Dictionary dictionary = new Dictionary(pathToDictionary);
+    static public Vector<String> check(Path pathToFileToCheck){
         Scanner fileInputScanner = null;
         try {
             fileInputScanner = new Scanner(pathToFileToCheck);
