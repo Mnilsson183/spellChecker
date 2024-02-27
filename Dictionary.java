@@ -21,9 +21,12 @@ public class Dictionary {
         while(dictionaryInputScanner.hasNext()){
             CharacterNode currentCharacterNode = characterNodeStart;
             String word = dictionaryInputScanner.next();
+            System.out.println(word);
             for(int i = 0; i < word.length(); i++){
                 char c = Character.toLowerCase(word.charAt(i));
-                currentCharacterNode.chars[c - 97] = new CharacterNode(word.charAt(i));
+                if(currentCharacterNode.chars[c - 97] == null){
+                    currentCharacterNode.chars[c - 97] = new CharacterNode(word.charAt(i));
+                }
                 currentCharacterNode = currentCharacterNode.chars[c - 97];
                 if(i == word.length() - 1){
                     currentCharacterNode.wordExists = true;
@@ -117,21 +120,21 @@ public class Dictionary {
         if(currentCharacterNode == null){
             return null;
         }
-
-        CharacterNode wordPartialHead = currentCharacterNode;
-        dumpTreeStructure(wordPartialHead, wordPartial);
-
+        wordPartial = wordPartial.substring(0,wordPartial.length() - 1);
+        dumpTreeStructure(currentCharacterNode, wordPartial);
         return sortTheDumpedTreeStructureByStringSize(freeUseVector);
     }
 
+    // clear before use
     // Vector for local use
-    // clear after use
+    // 
     private Vector<String> freeUseVector = new Vector<>();
+
     /* 
      * Dump the characterNode tree structure into the free use vector
     */
     private void dumpTreeStructure(CharacterNode characterNodeHead, String additional){
-        if(characterNodeHead.wordExists){
+        if(characterNodeHead.wordExists == true){
             freeUseVector.add(additional + characterNodeHead.myChar);
         }
         for(int i = 0; i < characterNodeHead.chars.length; i++){
@@ -143,7 +146,12 @@ public class Dictionary {
 
     private Vector<String> sortTheDumpedTreeStructureByStringSize(Vector<String> treeDump){
         quickSortOnCharacterLength(treeDump, 0, treeDump.size() - 1);
-        return new Vector<>(treeDump);
+
+        Vector<String> rets = new Vector<>();
+        for(int i = 0; i < treeDump.size(); i++){
+            rets.add(treeDump.get(i));
+        }
+        return rets;
     }
 
     private static void swap(Vector<String> arr, int i, int j)
@@ -180,5 +188,9 @@ public class Dictionary {
             quickSortOnCharacterLength(arr, low, pi - 1);
             quickSortOnCharacterLength(arr, pi + 1, high);
         }
+    }
+
+    public void printDictionary(){
+        characterNodeStart.printNodesFromPointCaller();
     }
 }
