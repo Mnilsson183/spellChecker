@@ -43,4 +43,8 @@ public class SpellCheck {
             System.out.println(misspelledWords.elementAt(i));
         }
     }
+
+    public static void printAlternatives(String misspelled, Vector<String> alternatives){
+        System.out.println(misspelled + " -> " + alternatives.get(0));
+    }
 }
