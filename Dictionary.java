@@ -49,6 +49,32 @@ public class Dictionary {
         dictionaryInputScanner.close();
     }
 
+    public void addNode(String word){
+        CharacterNode currentCharacterNode = characterNodeStart;
+        for(int i = 0; i < word.length(); i++){
+            char c = Character.toLowerCase(word.charAt(i));
+            try {
+                if(c == '\''){
+                    if(currentCharacterNode.chars[26] == null){
+                        currentCharacterNode.chars[26] = new CharacterNode(word.charAt(i));
+                    }
+                    currentCharacterNode = currentCharacterNode.chars[26];
+                } else if(Character.isLetterOrDigit(c)){
+                    if(currentCharacterNode.chars[c - 97] == null){
+                        currentCharacterNode.chars[c - 97] = new CharacterNode(word.charAt(i));
+                    }
+                    currentCharacterNode = currentCharacterNode.chars[c - 97];
+                }
+            } catch (Exception e) {
+                System.out.println("Bad value in the dictionary " + "\"" + c + "\"" + " in word " + word);
+                System.exit(0);
+            }
+            if(i == word.length() - 1){
+                currentCharacterNode.wordExists = true;
+            }
+        }
+    }
+
     public boolean findWord(String word){
         CharacterNode currentCharacterNode = characterNodeStart;
         for(int i = 0; i < word.length(); i++){
