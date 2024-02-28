@@ -21,7 +21,6 @@ public class Dictionary {
         while(dictionaryInputScanner.hasNext()){
             CharacterNode currentCharacterNode = characterNodeStart;
             String word = dictionaryInputScanner.next();
-            System.out.println(word);
             for(int i = 0; i < word.length(); i++){
                 char c = Character.toLowerCase(word.charAt(i));
                 if(currentCharacterNode.chars[c - 97] == null){
