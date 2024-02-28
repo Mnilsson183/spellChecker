@@ -31,7 +31,7 @@ public class CharacterNode{
 
     public void printNodesFromPoint(int indentLevel, CharacterNode characterNode){
         for(int i = 0; i < indentLevel; i++){
-            System.out.print("\t");
+            System.out.print("  ");
         }
         System.out.println(characterNode.toString());
         for(int i = 0; i < chars.length; i++){

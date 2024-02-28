@@ -6,6 +6,7 @@ public class Dictionary {
 
     CharacterNode characterNodeStart = new CharacterNode('\u0000');
     Path sourcePath = null;
+    final int maxDistanceValue = 1;
 
     public Dictionary(Path path){
         Scanner dictionaryInputScanner = null;
@@ -18,9 +19,9 @@ public class Dictionary {
             return;
         }
 
-        while(dictionaryInputScanner.hasNext()){
+        while(dictionaryInputScanner.hasNextLine()){
             CharacterNode currentCharacterNode = characterNodeStart;
-            String word = dictionaryInputScanner.next();
+            String word = dictionaryInputScanner.nextLine();
             for(int i = 0; i < word.length(); i++){
                 char c = Character.toLowerCase(word.charAt(i));
                 try {
@@ -29,14 +30,14 @@ public class Dictionary {
                             currentCharacterNode.chars[26] = new CharacterNode(word.charAt(i));
                         }
                         currentCharacterNode = currentCharacterNode.chars[26];
-                    } else{
+                    } else if(Character.isLetterOrDigit(c)){
                         if(currentCharacterNode.chars[c - 97] == null){
                             currentCharacterNode.chars[c - 97] = new CharacterNode(word.charAt(i));
                         }
                         currentCharacterNode = currentCharacterNode.chars[c - 97];
                     }
                 } catch (Exception e) {
-                    System.out.println("Bad value in the dictionary " + "\"" + c + "\"");
+                    System.out.println("Bad value in the dictionary " + "\"" + c + "\"" + " in word " + word);
                     System.exit(0);
                 }
                 if(i == word.length() - 1){
@@ -54,11 +55,17 @@ public class Dictionary {
             if(currentCharacterNode == null){
                 return false;
             }
-            char c = Character.toLowerCase(word.charAt(i));
-            if(c == '\''){
-                currentCharacterNode = currentCharacterNode.chars[26];
-            } else{
-                currentCharacterNode = currentCharacterNode.chars[c - 97];
+            char c = '\u0000';
+            try {
+                c = Character.toLowerCase(word.charAt(i));
+                if(c == '\''){
+                    currentCharacterNode = currentCharacterNode.chars[26];
+                } else{
+                    currentCharacterNode = currentCharacterNode.chars[c - 97];
+                }   
+            } catch (Exception e) {
+                System.out.println("Bad value in the source file " + "\"" + c + "\"" + " in word" + word);
+                System.exit(0);
             }
         }
 
@@ -74,7 +81,6 @@ public class Dictionary {
         if (m == 0) {
             return n;
         }
-
         // str2 is empty
         if (n == 0) {
             return m;
@@ -89,7 +95,6 @@ public class Dictionary {
             Math.min(
             // Remove
             levenshteinDistance(s1, s2, m - 1, n),
-
             // Replace
             levenshteinDistance(s1, s2, m - 1, n - 1)
             )
@@ -164,13 +169,9 @@ public class Dictionary {
         return distanceMatrix[lenS1][lenS2];
     }
 
-    public Vector<String> findAlternatives(String s){
-        Vector<String> closeStrings = new Vector<>();
-        if(LookupTable.getLookup(s) != null){
-            System.out.println("S");
-            return LookupTable.getLookup(s);
-        }
+    private Vector<String> readDictionaryToArray(){
         Scanner dictionarySourceInput = null;
+        Vector<String> dictionaryVector = new Vector<>();
         try {
             dictionarySourceInput = new Scanner(this.sourcePath);
         } catch (Exception e) {
@@ -178,21 +179,35 @@ public class Dictionary {
             dictionarySourceInput.close();
             return null;
         }
+        while (dictionarySourceInput.hasNext()) {
+            dictionaryVector.add(dictionarySourceInput.next());
+        }
+        dictionarySourceInput.close();
+        return dictionaryVector;
+    }
+
+    public Vector<String> findAlternatives(String s){
+        Vector<String> closeStrings = new Vector<>();
+        if(LookupTable.getLookup(s) != null){
+            closeStrings.add(LookupTable.getLookup(s));
+            return closeStrings;
+        }
 
         String closestString = "";
         int closestDistance = Integer.MAX_VALUE;
-        while (dictionarySourceInput.hasNext()) {
-            String dictionaryWord = dictionarySourceInput.next();
+        Vector<String> dictionaryVector = readDictionaryToArray();
+        for(int i = 0; i < dictionaryVector.size(); i++){
             //int currentDistance = levenshteinDistance(s, dictionaryWord, s.length(), dictionaryWord.length());
             //int currentDistance = damerauLevenshteinDistance(s, dictionaryWord);
-            int currentDistance = levenshteinMatrixDistance(s, dictionaryWord);
+            int currentDistance = levenshteinMatrixDistance(s, dictionaryVector.get(i));
             if(currentDistance < closestDistance){
-                closestString = dictionaryWord;
+                closestString = dictionaryVector.get(i);
                 closestDistance = currentDistance; 
             }
         }
-        dictionarySourceInput.close();
+        LookupTable.addMisspelled(s, closestString);
         closeStrings.add(closestString);
+        LookupTable.addMisspelled(s, closestString);
         return closeStrings;
     }
 

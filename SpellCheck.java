@@ -23,19 +23,36 @@ public class SpellCheck {
 
         Vector<String> misspelledWords = new Vector<>();
         while(fileInputScanner.hasNext()){
-            String word = cleanWord(fileInputScanner.next());
-            if(!dictionary.findWord(word)){
-                misspelledWords.add(word);
-            }
+            addIfMisspelledWord(fileInputScanner.next(), misspelledWords);
         }
 
         fileInputScanner.close();
         return misspelledWords;
     }
 
-    // TODO impl
-    private static String cleanWord(String s){
-        return s;
+    private static void addIfMisspelledWord(String s, Vector<String> misspelledWords){
+        String word = "";
+        for(int i = 0; i < s.length(); i++){
+            if(Character.isLetter(s.charAt(i))){
+                word += Character.toLowerCase(s.charAt(i));
+            } else if(s.charAt(i) == '\''){
+                word += s.charAt(i);
+            } else if(s.charAt(i) == '-'){
+                if(!dictionary.findWord(word)){
+                    misspelledWords.add(word);
+                }
+                for(int j = i + 1; j < s.length(); j++){
+
+                }
+                addIfMisspelledWord(s.substring(i + 1), misspelledWords);
+                return;
+            }
+        }
+
+        if(!dictionary.findWord(word)){
+            misspelledWords.add(word);
+        }
+        
     }
 
     public static void printMisspelledWords(Vector<String> misspelledWords){
