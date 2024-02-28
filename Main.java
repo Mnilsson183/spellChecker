@@ -13,6 +13,7 @@ public class Main {
         for(int i = 0; i < misspelled.size(); i++){
             SpellCheck.printAlternatives(misspelled.get(i), SpellCheck.dictionary.findAlternatives(misspelled.get(i)));
         }
+        // SpellCheck.printAlternatives(misspelled.get(0), SpellCheck.dictionary.findAlternatives(misspelled.get(0)));
         Vector<String> suggest = SpellCheck.dictionary.autoCompleteSuggest("cotton");
         if(suggest == null){
             System.out.println("No results found");

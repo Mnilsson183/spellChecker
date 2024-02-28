@@ -23,10 +23,22 @@ public class Dictionary {
             String word = dictionaryInputScanner.next();
             for(int i = 0; i < word.length(); i++){
                 char c = Character.toLowerCase(word.charAt(i));
-                if(currentCharacterNode.chars[c - 97] == null){
-                    currentCharacterNode.chars[c - 97] = new CharacterNode(word.charAt(i));
+                try {
+                    if(c == '\''){
+                        if(currentCharacterNode.chars[26] == null){
+                            currentCharacterNode.chars[26] = new CharacterNode(word.charAt(i));
+                        }
+                        currentCharacterNode = currentCharacterNode.chars[26];
+                    } else{
+                        if(currentCharacterNode.chars[c - 97] == null){
+                            currentCharacterNode.chars[c - 97] = new CharacterNode(word.charAt(i));
+                        }
+                        currentCharacterNode = currentCharacterNode.chars[c - 97];
+                    }
+                } catch (Exception e) {
+                    System.out.println("Bad value in the dictionary " + "\"" + c + "\"");
+                    System.exit(0);
                 }
-                currentCharacterNode = currentCharacterNode.chars[c - 97];
                 if(i == word.length() - 1){
                     currentCharacterNode.wordExists = true;
                 }
@@ -43,7 +55,11 @@ public class Dictionary {
                 return false;
             }
             char c = Character.toLowerCase(word.charAt(i));
-            currentCharacterNode = currentCharacterNode.chars[c - 97];
+            if(c == '\''){
+                currentCharacterNode = currentCharacterNode.chars[26];
+            } else{
+                currentCharacterNode = currentCharacterNode.chars[c - 97];
+            }
         }
 
         if(currentCharacterNode == null){
@@ -80,8 +96,80 @@ public class Dictionary {
         );
     }
 
+    private int levenshteinMatrixDistance(String s1, String s2){
+        int m = s1.length();
+        int n = s2.length();
+
+        int[][] dp = new int[m + 1][n + 1];
+
+        for (int i = 0; i <= m; i++) {
+            dp[i][0] = i;
+        }
+        for (int j = 0; j <= n; j++) {
+            dp[0][j] = j;
+        }
+
+        // Fill in the rest of the matrix
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (s1.charAt(i - 1) == s2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1]; // No operation required
+                } else {
+                    dp[i][j] = 1 + Math.min(Math.min(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]); // Insertion, deletion, or substitution
+                }
+            }
+        }
+
+        // Return the distance
+        return dp[m][n];
+    }
+
+    private int damerauLevenshteinDistance(String s1, String s2){
+        int lenS1 = s1.length();
+        int lenS2 = s2.length();
+
+        int[][] distanceMatrix = new int[lenS1 + 1][lenS2 + 1];
+
+        for (int i = 0; i <= lenS1; i++) {
+            distanceMatrix[i][0] = i;
+        }
+        for (int j = 0; j <= lenS2; j++) {
+            distanceMatrix[0][j] = j;
+        }
+
+        // Fill in the matrix
+        for (int i = 1; i <= lenS1; i++) {
+            for (int j = 1; j <= lenS2; j++) {
+                int cost = (s1.charAt(i - 1) == s2.charAt(j - 1)) ? 0 : 1;
+
+                distanceMatrix[i][j] = Math.min(
+                        distanceMatrix[i - 1][j] + 1, // deletion
+                        Math.min(
+                                distanceMatrix[i][j - 1] + 1, // insertion
+                                distanceMatrix[i - 1][j - 1] + cost // substitution
+                        )
+                );
+
+                // Transposition check
+                if (i > 1 && j > 1 && s1.charAt(i - 1) == s2.charAt(j - 2) && s1.charAt(i - 2) == s2.charAt(j - 1)) {
+                    distanceMatrix[i][j] = Math.min(
+                            distanceMatrix[i][j],
+                            distanceMatrix[i - 2][j - 2] + cost
+                    );
+                }
+            }
+        }
+
+        // Return the distance between the two strings
+        return distanceMatrix[lenS1][lenS2];
+    }
+
     public Vector<String> findAlternatives(String s){
         Vector<String> closeStrings = new Vector<>();
+        if(LookupTable.getLookup(s) != null){
+            System.out.println("S");
+            return LookupTable.getLookup(s);
+        }
         Scanner dictionarySourceInput = null;
         try {
             dictionarySourceInput = new Scanner(this.sourcePath);
@@ -95,7 +183,9 @@ public class Dictionary {
         int closestDistance = Integer.MAX_VALUE;
         while (dictionarySourceInput.hasNext()) {
             String dictionaryWord = dictionarySourceInput.next();
-            int currentDistance = levenshteinDistance(s, dictionaryWord, s.length(), dictionaryWord.length());
+            //int currentDistance = levenshteinDistance(s, dictionaryWord, s.length(), dictionaryWord.length());
+            //int currentDistance = damerauLevenshteinDistance(s, dictionaryWord);
+            int currentDistance = levenshteinMatrixDistance(s, dictionaryWord);
             if(currentDistance < closestDistance){
                 closestString = dictionaryWord;
                 closestDistance = currentDistance; 
