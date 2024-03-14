@@ -49,7 +49,7 @@ public class Dictionary {
         dictionaryInputScanner.close();
     }
 
-    public void addNode(String word){
+    public void addWord(String word){
         CharacterNode currentCharacterNode = characterNodeStart;
         for(int i = 0; i < word.length(); i++){
             char c = Character.toLowerCase(word.charAt(i));
